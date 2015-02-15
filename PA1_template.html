@@ -212,37 +212,34 @@ print(&quot;# Fit bit Means and Medians&quot;)</code></pre>
 <h2>Primary Strategy: Use the per 5 minute block mean to replace the NA’s for the same block. Code follows.</h2>
 <p>Getting the number of NA’s can be performed with SQL. hmmm does not seem to be working …</p>
 <pre class="r"><code>countNA &lt;- sqldf(&quot;select count(steps) from fitbit where steps = 'NA'&quot;)
-  
-countNA</code></pre>
-<pre><code>##   count(steps)
-## 1            0</code></pre>
+sprintf(&quot;The count is %s; but appears to have failed. See the R way below w/iterator.&quot;, countNA)  </code></pre>
+<pre><code>## [1] &quot;The count is 0; but appears to have failed. See the R way below w/iterator.&quot;</code></pre>
 </div>
 <div id="i-would-like-an-iterator-found-this" class="section level2">
 <h2>I would like an iterator, found this</h2>
 <div id="itertools-and-iterators" class="section level3">
 <h3>itertools and iterators</h3>
-<p><a href="Iterators%20at%20http://www.r-bloggers.com/iterators-in-r/"><a href="http://www.r-bloggers.com/iterators-in-r/">http://www.r-bloggers.com/iterators-in-r/</a></a> ## This is horrible, I don’t like it but it seems to work … ## There is probably a more R way to do this; ran out of time ### My iterator worked, I could step over the date but I had trouble ### catching the end of the data error, killing the knitr process.</p>
-<pre class="r"><code>#myCountNA &lt;- function(myDataFrameVector){ 
-#  tryCatch(
-#    cntr = 0
-#    stepsIter &lt;- iter(myDataFrameVector, by=&quot;row&quot;) 
-#      while(1==1) {
-#       nxtRow &lt;- nextElem(stepsIter) 
-#       if ( is.na(nxtRow$steps) ) { 
-#       cntr = cntr + 1 
-#      }
-#      return(cntr)
-#    },
-#    error = function(e){return(cntr)}
-#  )
-#} # Ends the function definitions
-
-#myCountNA(fitbit)
-sprintf(&quot;There are %d NA's in the original data.&quot;,2304)</code></pre>
-<pre><code>## [1] &quot;There are 2304 NA's in the original data.&quot;</code></pre>
-<pre class="r"><code>print(&quot;My deepest apologies, I think I ran out of time....&quot;)</code></pre>
-<pre><code>## [1] &quot;My deepest apologies, I think I ran out of time....&quot;</code></pre>
+<p><a href="Iterators%20at%20http://www.r-bloggers.com/iterators-in-r/"><a href="http://www.r-bloggers.com/iterators-in-r/">http://www.r-bloggers.com/iterators-in-r/</a></a></p>
 </div>
+</div>
+<div id="this-is-horrible-i-dont-like-it-but-it-seems-to-work-there-might-be-a-better-way." class="section level2">
+<h2>This is horrible, I don’t like it but it seems to work … There might be a better way.</h2>
+<pre class="r"><code># initalize a counter, or create a vector ... can't is.na directly
+cntr = 0
+stepsIter &lt;- iter(fitbit, by=&quot;row&quot;) 
+    while(1==1) {
+        d=try(nextElem(stepsIter))
+        if (class(d) == &quot;try-error&quot;) break  # This is the exit
+       
+        nxtRow &lt;- nextElem(stepsIter) 
+        if ( is.na(d$steps) ) { 
+         cntr = cntr + 1 
+       }
+   } 
+ 
+sprintf(&quot;There are %d NA's in the original data.&quot;,cntr)</code></pre>
+<pre><code>## [1] &quot;There are 1152 NA's in the original data.&quot;</code></pre>
+<pre class="r"><code>## print(&quot;My deepest apologies, I think I ran out of time....&quot;)</code></pre>
 </div>
 </div>
 

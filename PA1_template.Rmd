@@ -90,37 +90,32 @@ Getting the number of NA's can be performed with SQL.
 hmmm does not seem to be working ...
 ```{r}
 countNA <- sqldf("select count(steps) from fitbit where steps = 'NA'")
-  
-countNA
+sprintf("The count is %s; but appears to have failed. See the R way below w/iterator.", countNA)  
+
 ```
 
 ## I would like an iterator, found this
 ### itertools and iterators
 [http://www.r-bloggers.com/iterators-in-r/]( Iterators at http://www.r-bloggers.com/iterators-in-r/ )
-## This is horrible, I don't like it but it seems to work ...
-## There is probably a more R way to do this; ran out of time
-### My iterator worked, I could step over the date but I had trouble
-### catching the end of the data error, killing the knitr process.
+
+## This is horrible, I don't like it but it seems to work ... There might be a better way.
+ 
 
 ```{r} 
+# initalize a counter, or create a vector ... can't is.na directly
+cntr = 0
+stepsIter <- iter(fitbit, by="row") 
+    while(1==1) {
+        d=try(nextElem(stepsIter))
+        if (class(d) == "try-error") break  # This is the exit
+       
+        nxtRow <- nextElem(stepsIter) 
+        if ( is.na(d$steps) ) { 
+         cntr = cntr + 1 
+       }
+   } 
+ 
+sprintf("There are %d NA's in the original data.",cntr)
 
-#myCountNA <- function(myDataFrameVector){ 
-#  tryCatch(
-#    cntr = 0
-#    stepsIter <- iter(myDataFrameVector, by="row") 
-#      while(1==1) {
-#       nxtRow <- nextElem(stepsIter) 
-#       if ( is.na(nxtRow$steps) ) { 
-#       cntr = cntr + 1 
-#      }
-#      return(cntr)
-#    },
-#    error = function(e){return(cntr)}
-#  )
-#} # Ends the function definitions
-
-#myCountNA(fitbit)
-sprintf("There are %d NA's in the original data.",2304)
-
-print("My deepest apologies, I think I ran out of time....")
+## print("My deepest apologies, I think I ran out of time....")
 ```
