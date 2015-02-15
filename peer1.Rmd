@@ -57,23 +57,20 @@ countNA
 ## This is horrible, I don't like it but it seems to work ...
 ## There is probably a more R way to do this; ran out of time
 ```{r} 
-#myCountNA <- function(myDataFrameVector){ 
-#  tryCatch(
-#    cntr = 0
-#    stepsIter <- iter(myDataFrameVector, by="row") 
-#      while(1==1) {
-#       nxtRow <- nextElem(stepsIter) 
-#       if ( is.na(nxtRow$steps) ) { 
-#       cntr = cntr + 1 
-#      }
-#      return(cntr)
-#    },
-#    error = function(e){return(cntr)}
-#  )
-#} # Ends the function definitions
+myCountNA <- function(myDataFrameVector){ 
+  tryCatch(
+    cntr = 0
+    stepsIter <- iter(myDataFrameVector, by="row") 
+      while(1==1) {
+       nxtRow <- nextElem(stepsIter) 
+       if ( is.na(nxtRow$steps) ) { 
+       cntr = cntr + 1 
+      }
+      return(cntr)
+    },
+    error = function(e){return(cntr)}
+  )
+} # Ends the function definitions
 
-#myCountNA(fitbit)
-sprintf("There are %d NA's in the original data.",2304)
-
-print("My deepest apologies, I think I ran out of time....")
+myCountNA(fitbit)
 ```
