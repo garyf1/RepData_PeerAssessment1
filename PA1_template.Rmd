@@ -7,7 +7,11 @@ output: html_document
 
 This is the peer assessed project one. I have a long history with relational databases. (My favorite SAS PROC is Proc SQL) I am using the R equivilent R library. sqldf
 
-Initial analysis, daily histogram.
+I also discovered the iterator library, I think this will be most helpful ...
+
+I am doing both the SQL way and the R way. I am seeing some differences and I am not sure if the SQL way is the best way to query a data.frame. Please watch for this as there might be 2 analysis per question / part...
+
+# Initial analysis, daily histogram.
 
 ```{r}
 require(sqldf)
@@ -34,7 +38,43 @@ The number of steps by time of day; grouped by 5 minute groups
  plot(x=minAverage$interval, y=minAverage$avg_steps)
 ```
 
- The maximum average steps occur at the timepoint 8:35, with 206 steps by visual inspection. Computed result follows.
+# The R way
+
+ Get the list of unique dates, subset the days then calculate the mean and median, make a new dataframe, print that one at the end.
+
+### If I could loop over the dates without error ... see tryCatch code most useful
+### errors in the code prevent knitr from knitting ... this allows the process to continue
+### Granted it would be better to halt the while loop when the iterator hasMore == FALSE
+
+ 
+
+```{r} 
+# Subset the dates
+myUniqueDates = unique(fitbit$date)
+
+# empty new data.frame
+myMeanDataFrame<-NULL;
+
+# make the iterator, loop forever or until it dies (sad)
+myDateIter <-iter(myUniqueDates)
+while(TRUE){
+ 
+  d=try(nextElem(myDateIter))
+  if (class(d) == "try-error") break  
+  
+  m1 <- mean(subset(fitbit, fitbit$date==d)$steps) 
+  m2 <- median(subset(fitbit, fitbit$date==d)$steps)
+  rbind(myMeanDataFrame, data.frame(date=d, mean=m1, median=m2) ) -> myMeanDataFrame
+                
+}
+print("# Fit bit Means and Medians")
+print(myMeanDataFrame)
+```
+
+## This was based on the SQL commands and appears to be wrong .. me or SQL?
+The maximum average steps occur at the timepoint 8:35, with 206 steps by visual inspection. Computed result follows.
+
+
 ```{r }
 maxTimePoint <- sqldf('select interval, max(avg_steps) as mostSteps from minAverage')
 'Max average STeps'
@@ -43,6 +83,9 @@ maxTimePoint$mostSteps
 maxTimePoint$interval
 
 ```
+# Begin the Imputation
+## Primary Strategy: Use the per 5 minute block mean to replace the NA's for the same block. Code follows.
+
 Getting the number of NA's can be performed with SQL.
 hmmm does not seem to be working ...
 ```{r}
@@ -56,7 +99,11 @@ countNA
 [http://www.r-bloggers.com/iterators-in-r/]( Iterators at http://www.r-bloggers.com/iterators-in-r/ )
 ## This is horrible, I don't like it but it seems to work ...
 ## There is probably a more R way to do this; ran out of time
+### My iterator worked, I could step over the date but I had trouble
+### catching the end of the data error, killing the knitr process.
+
 ```{r} 
+
 #myCountNA <- function(myDataFrameVector){ 
 #  tryCatch(
 #    cntr = 0
